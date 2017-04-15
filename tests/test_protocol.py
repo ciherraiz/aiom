@@ -1,22 +1,22 @@
 from domain.protocol import SenderProtocol, ReceiverProtocol
-from domain.message import Message
 import asyncio
 
 
-received_message = None
+received_data = None
 
 
 def message_handler(msg):
-        global received_message
-        received_message = msg
+        global received_data
+        received_data = msg
 
 
-def test_send_text():
+def test_send_data():
+    global received_data
     sender_host = '127.0.0.1'
     receiver_host = '0.0.0.0'
     port = 8888
     msg = 'hello my friend!'
-    message = Message(msg)
+    data = msg.encode()
 
     loop = asyncio.get_event_loop()
     loop.set_debug(True)
@@ -30,20 +30,23 @@ def test_send_text():
     coror = loop.create_server(lambda: ReceiverProtocol(message_handler),
                                receiver_host,
                                port)
+
     receiver = loop.run_until_complete(coror)
 
     sender_completed = asyncio.Future()
     coros = loop.create_connection(
-        lambda: SenderProtocol(message, sender_completed),
+        lambda: SenderProtocol(data, sender_completed),
         sender_host,
         port
     )
     try:
         loop.run_until_complete(coros)
         loop.run_until_complete(sender_completed)
+    except:
+        print("test_send_a_message exception!")
     finally:
         receiver.close()
         loop.run_until_complete(receiver.wait_closed())
-        loop.close()
+        # loop.close()
 
-    assert msg == received_message
+    assert data == received_data

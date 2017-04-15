@@ -1,5 +1,7 @@
+import asyncio
 from domain.channel import Channel, SenderChannel, ReceiverChannel
 from domain.message import Message
+
 
 
 def test_create_a_channel():
@@ -9,13 +11,16 @@ def test_create_a_channel():
     assert ch.host == h and ch.port == p
 
 
-"""
 def test_send_a_message():
-    h = '127.0.0.1'
+    sh = '127.0.0.1'
+    rh = '0.0.0.0'
     p = 8888
-    m = Message("hey brother!")
-    sch = SenderChannel(host=h, port=p)
-    rch = ReceiverChannel(host=h, port=p)
-    sch.send(m)
-    assert m == rch.receive()
-"""
+    m = Message('Filipino')
+    loop = asyncio.get_event_loop()
+    sch = SenderChannel(sh, p)
+    rch = ReceiverChannel(rh, p)
+    try:
+        sch.send(m)
+    finally:
+        rch.close()
+        # loop.close()

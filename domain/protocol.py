@@ -13,8 +13,8 @@ logging.basicConfig(
 class SenderProtocol(asyncio.Protocol):
     """Sender protocol class
     """
-    def __init__(self, message: Message, future: asyncio.Future):
-        self.message = message
+    def __init__(self, data: bytes, future: asyncio.Future):
+        self.data = data
         self.log = logging.getLogger('SenderProtocol')
         self.future = future
 
@@ -22,8 +22,8 @@ class SenderProtocol(asyncio.Protocol):
         """When the client succesfully connects to the server, it starts
         communicating immediately."""
         self.transport = transport
-        self.transport.write(self.message.body.encode())
-        self.log.debug('sending {!r}'.format(self.message.body.encode()))
+        self.transport.write(self.data)
+        self.log.debug('sending {!r}'.format(self.data))
         if self.transport.can_write_eof():
             self.transport.write_eof()
 
@@ -45,8 +45,8 @@ class ReceiverProtocol(asyncio.Protocol):
     ReceiverProtocol handles client communication. Each new client connection
     creates a new protocol instance
     """
-    def __init__(self, message_handler):
-        self.message_handler = message_handler
+    def __init__(self, data_handler):
+        self.handler = data_handler
 
     def connection_made(self, transport):
         """Each new client connection triggers a cal to connection_made
@@ -64,7 +64,7 @@ class ReceiverProtocol(asyncio.Protocol):
         Data is passed as a byte string, and it is up to the application to
         decode it in a appropiate way"""
         self.log.debug('received {!r}'.format(data))
-        self.message_handler(data.decode())
+        self.handler(data)
 
     def eof_received(self):
         """Some transports support a special end-of-file indicator (EOF)
