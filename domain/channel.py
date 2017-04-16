@@ -14,29 +14,38 @@ class SenderChannel(Channel):
     """Sender channel class"""
     def __init__(self, host=None, port=None):
         super().__init__(host, port)
+        self.queue = asyncio.Queue()
+        loop = asyncio.get_event_loop()
+        asyncio.ensure_future(self._process_queue(loop))
 
     def send(self, message: Message):
-        loop = asyncio.get_event_loop()
-        sender_completed = asyncio.Future()
-        coro = loop.create_connection(
-            lambda: SenderProtocol(message.body.encode(), sender_completed),
-            self.host,
-            self.port
-        )
-        try:
-            loop.run_until_complete(coro)
-            loop.run_until_complete(sender_completed)
-        except:
-            raise OSError('Sender channel unable to send a message')
+        self.queue.put_nowait(message.body.encode())
+
+    async def _process_queue(self, loop):
+        while True:
+            data = await self.queue.get()
+            sender_completed = loop.create_future()
+            sender_connected = loop.create_connection(
+                lambda: SenderProtocol(data, sender_completed),
+                self.host,
+                self.port
+            )
+
+            await sender_connected
+            await sender_completed
 
 
 class ReceiverChannel(Channel):
     """Receiver channel class"""
     def __init__(self, host=None, port=None):
         super().__init__(host, port)
+
+        self.queue = asyncio.Queue()
+
         loop = asyncio.get_event_loop()
+
         coro = loop.create_server(
-            lambda: ReceiverProtocol(self._receive),
+            lambda: ReceiverProtocol(self.queue),
             self.host,
             self.port
         )
@@ -44,9 +53,6 @@ class ReceiverChannel(Channel):
             self.server = loop.run_until_complete(coro)
         except:
             raise OSError('Receiver channel unable to start')
-
-    def _receive(self, data: bytes):
-        print(data)
 
     def close(self):
         loop = asyncio.get_event_loop()

@@ -1,5 +1,7 @@
-Add a queue to ReceiverChannel
+
 Add logging in Channel classes
-Create a example with a SenderChannel and a ReceiverChannel
-Check if run_until_complete checks only DONE state (cancel??)
+Task was destroyed but it is pending!
+
 DONE
+Add a queue to ReceiverChannel
+Create a example with a SenderChannel and a ReceiverChannel

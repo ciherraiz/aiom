@@ -5,6 +5,8 @@ from domain.message import Message
 loop = asyncio.get_event_loop()
 loop.set_debug(True)
 
+queue = asyncio.Queue()
+
 received_message = None
 
 
@@ -19,7 +21,7 @@ msg = 'hello my friend!'
 message = Message(msg)
 
 coror = loop.create_server(
-    lambda: ReceiverProtocol(message_handler),
+    lambda: ReceiverProtocol(queue),
     receiver_host,
     port
 )

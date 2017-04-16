@@ -2,21 +2,13 @@ from domain.protocol import SenderProtocol, ReceiverProtocol
 import asyncio
 
 
-received_data = None
-
-
-def message_handler(msg):
-        global received_data
-        received_data = msg
-
-
 def test_send_data():
-    global received_data
     sender_host = '127.0.0.1'
     receiver_host = '0.0.0.0'
     port = 8888
     msg = 'hello my friend!'
     data = msg.encode()
+    queue = asyncio.Queue()
 
     loop = asyncio.get_event_loop()
     loop.set_debug(True)
@@ -27,7 +19,7 @@ def test_send_data():
     actually start the server. Completing the coroutine produces a asyncio.
     Server instance tied to the event loop
     """
-    coror = loop.create_server(lambda: ReceiverProtocol(message_handler),
+    coror = loop.create_server(lambda: ReceiverProtocol(queue),
                                receiver_host,
                                port)
 
@@ -39,9 +31,11 @@ def test_send_data():
         sender_host,
         port
     )
+    rdata = None
     try:
         loop.run_until_complete(coros)
         loop.run_until_complete(sender_completed)
+        rdata = queue.get_nowait()
     except:
         print("test_send_a_message exception!")
     finally:
@@ -49,4 +43,4 @@ def test_send_data():
         loop.run_until_complete(receiver.wait_closed())
         # loop.close()
 
-    assert data == received_data
+    assert data == rdata

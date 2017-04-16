@@ -21,6 +21,8 @@ def test_send_a_message():
     rch = ReceiverChannel(rh, p)
     try:
         sch.send(m)
+        rm = rch.queue.get_nowait()
     finally:
         rch.close()
         # loop.close()
+    assert m == rm

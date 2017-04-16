@@ -37,7 +37,8 @@ class SenderProtocol(asyncio.Protocol):
         self.log.debug('closing connection')
         self.transport.close()
         if not self.future.done():
-            self.future.set_result(True)
+            self.future.cancel()
+            # self.future.set_result(False)
 
 
 class ReceiverProtocol(asyncio.Protocol):
@@ -45,8 +46,8 @@ class ReceiverProtocol(asyncio.Protocol):
     ReceiverProtocol handles client communication. Each new client connection
     creates a new protocol instance
     """
-    def __init__(self, data_handler):
-        self.handler = data_handler
+    def __init__(self, queue: asyncio.Queue):
+        self.queue = queue
 
     def connection_made(self, transport):
         """Each new client connection triggers a cal to connection_made
@@ -64,7 +65,7 @@ class ReceiverProtocol(asyncio.Protocol):
         Data is passed as a byte string, and it is up to the application to
         decode it in a appropiate way"""
         self.log.debug('received {!r}'.format(data))
-        self.handler(data)
+        self.queue.put_nowait(data)
 
     def eof_received(self):
         """Some transports support a special end-of-file indicator (EOF)
