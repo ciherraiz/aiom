@@ -1,6 +1,7 @@
 
 Add logging in Channel classes
 Task was destroyed but it is pending!
+Call example scripts with parameters
 
 DONE
 Add a queue to ReceiverChannel

@@ -1,7 +1,6 @@
 import asyncio
 import logging
 import sys
-from domain.message import Message
 
 logging.basicConfig(
     level=logging.DEBUG,

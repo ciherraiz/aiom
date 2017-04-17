@@ -1,6 +1,14 @@
 import asyncio
+import logging
+import sys
 from domain.message import Message
 from domain.protocol import SenderProtocol, ReceiverProtocol
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(name)s: %(message)s',
+    stream=sys.stderr,
+)
 
 
 class Channel:
@@ -13,6 +21,7 @@ class Channel:
 class SenderChannel(Channel):
     """Sender channel class"""
     def __init__(self, host=None, port=None):
+        self.log = logging.getLogger('SenderChannel')
         super().__init__(host, port)
         self.queue = asyncio.Queue()
         loop = asyncio.get_event_loop()
@@ -20,6 +29,7 @@ class SenderChannel(Channel):
 
     def send(self, message: Message):
         self.queue.put_nowait(message.body.encode())
+        self.log.debug('adding a new item to queue')
 
     async def _process_queue(self, loop):
         while True:
@@ -33,13 +43,14 @@ class SenderChannel(Channel):
 
             await sender_connected
             await sender_completed
+            self.log.debug('sending the item')
 
 
 class ReceiverChannel(Channel):
     """Receiver channel class"""
     def __init__(self, host=None, port=None):
+        self.log = logging.getLogger('ReceiverChannel')
         super().__init__(host, port)
-
         self.queue = asyncio.Queue()
 
         loop = asyncio.get_event_loop()
@@ -50,6 +61,7 @@ class ReceiverChannel(Channel):
             self.port
         )
         try:
+            self.log.debug('creating the server')
             self.server = loop.run_until_complete(coro)
         except:
             raise OSError('Receiver channel unable to start')

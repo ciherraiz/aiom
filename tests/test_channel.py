@@ -16,7 +16,6 @@ def test_send_a_message():
     rh = '0.0.0.0'
     p = 8888
     m = Message('Filipino')
-    loop = asyncio.get_event_loop()
     sch = SenderChannel(sh, p)
     rch = ReceiverChannel(rh, p)
     try:
