@@ -5,7 +5,7 @@ from domain.message import Message
 loop = asyncio.get_event_loop()
 loop.set_debug(True)
 
-queue = asyncio.Queue()
+queue = asyncio.Queue()  # type: asyncio.Queue
 
 received_message = None
 

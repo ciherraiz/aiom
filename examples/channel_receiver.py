@@ -1,6 +1,5 @@
 import asyncio
 from domain.channel import ReceiverChannel
-from domain.message import Message
 
 h = '0.0.0.0'
 p = 8888

@@ -12,12 +12,13 @@ logging.basicConfig(
 class SenderProtocol(asyncio.Protocol):
     """Sender protocol class
     """
-    def __init__(self, data: bytes, future: asyncio.Future):
+    def __init__(self, data: bytes, future: asyncio.Future) -> None:
         self.data = data
         self.log = logging.getLogger('SenderProtocol')
         self.future = future
 
     def connection_made(self, transport):
+
         """When the client succesfully connects to the server, it starts
         communicating immediately."""
         self.transport = transport
@@ -32,12 +33,14 @@ class SenderProtocol(asyncio.Protocol):
         if not self.future.done():
             self.future.set_result(True)
 
-    def connection_lost(self, exc):
+    def connection_lost(self, error):
         self.log.debug('closing connection')
         self.transport.close()
-        if not self.future.done():
+        if error:
             self.future.cancel()
-            # self.future.set_result(False)
+            self.log.error('ERROR: {}'.format(error))
+        else:
+            self.log.debug('closing connection')
 
 
 class ReceiverProtocol(asyncio.Protocol):
@@ -45,7 +48,7 @@ class ReceiverProtocol(asyncio.Protocol):
     ReceiverProtocol handles client communication. Each new client connection
     creates a new protocol instance
     """
-    def __init__(self, queue: asyncio.Queue):
+    def __init__(self, queue: asyncio.Queue) -> None:
         self.queue = queue
 
     def connection_made(self, transport):

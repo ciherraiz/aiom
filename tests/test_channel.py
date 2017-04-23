@@ -3,7 +3,6 @@ from domain.channel import Channel, SenderChannel, ReceiverChannel
 from domain.message import Message
 
 
-
 def test_create_a_channel():
     h = '127.0.0.1'
     p = 8888
@@ -16,12 +15,14 @@ def test_send_a_message():
     rh = '0.0.0.0'
     p = 8888
     m = Message('Filipino')
+    loop = asyncio.get_event_loop()
     sch = SenderChannel(sh, p)
     rch = ReceiverChannel(rh, p)
     try:
         sch.send(m)
-        rm = rch.queue.get_nowait()
+        rm = loop.run_until_complete(rch.receive())
     finally:
         rch.close()
+
         # loop.close()
-    assert m == rm
+    assert m.body == rm.body

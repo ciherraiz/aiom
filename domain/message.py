@@ -1,4 +1,4 @@
 class Message:
     def __init__(self,
-                 data: str):
+                 data: str) -> None:
                 self.body = data

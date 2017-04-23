@@ -66,6 +66,11 @@ class ReceiverChannel(Channel):
         except:
             raise OSError('Receiver channel unable to start')
 
+    async def receive(self) -> Message:
+        data = await self.queue.get()
+        data = data.decode()
+        return Message(data)
+
     def close(self):
         loop = asyncio.get_event_loop()
         self.server.close()

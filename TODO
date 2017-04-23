@@ -1,8 +1,9 @@
 
-Add logging in Channel classes
+
 Task was destroyed but it is pending!
 Call example scripts with parameters
+Add None as results
 
 DONE
-Add a queue to ReceiverChannel
-Create a example with a SenderChannel and a ReceiverChannel
+Unit test "send a message" broken
+Add async def get_message to ChannelSender
